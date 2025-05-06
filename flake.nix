@@ -22,6 +22,14 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    #
+    # ===== Pre-commit Hooks =====
+    #
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -62,6 +70,19 @@
     };
 
     #
+    # ===== Formatting and Pre-commit Hooks =====
+    #
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
+
+    checks = forAllSystems (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+      import ./checks.nix { inherit inputs system pkgs; }
+    );
+
+    #
     # ===== Dev Shells =====
     #
     # Custom shell for bootstrapping on new hosts, modifying nix-config, and secrets management
@@ -69,6 +90,7 @@
       system:
         import ./shell.nix {
           pkgs = nixpkgs.legacyPackages.${system};
+          checks = self.checks.${system};
         }
     );
   };
