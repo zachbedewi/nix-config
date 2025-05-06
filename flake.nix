@@ -47,6 +47,15 @@
     lib = nixpkgs.lib.extend (self: super: { custom = import ./lib { inherit (nixpkgs) lib; }; });
 
   in {
+    #
+    # ===== Overlays =====
+    #
+    # Custom modifications/overrides to upstream packages
+    overlays = import ./overlays { inherit inputs; };
+
+    #
+    # ===== Host Configurations =====
+    #
     nixosConfigurations.eye-of-god = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
