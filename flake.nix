@@ -1,7 +1,7 @@
 {
   description = "Zach's Nix Configuration.";
 
-  inputs = { 
+  inputs = {
     #
     # ===== Official NixOS, Darwin, and Home Manager package sources =====
     #
@@ -28,8 +28,7 @@
     self,
     nixpkgs,
     ...
-  } @ inputs: 
-  let
+  } @ inputs: let
     inherit (self) outputs;
 
     #
@@ -44,14 +43,13 @@
     #
     # ===== Extending lib with lib.custom =====
     #
-    lib = nixpkgs.lib.extend (self: super: { custom = import ./lib { inherit (nixpkgs) lib; }; });
-
+    lib = nixpkgs.lib.extend (self: super: {custom = import ./lib {inherit (nixpkgs) lib;};});
   in {
     #
     # ===== Overlays =====
     #
     # Custom modifications/overrides to upstream packages
-    overlays = import ./overlays { inherit inputs; };
+    overlays = import ./overlays {inherit inputs;};
 
     #
     # ===== Host Configurations =====
@@ -62,5 +60,16 @@
         ./hosts/eye-of-god
       ];
     };
+
+    #
+    # ===== Dev Shells =====
+    #
+    # Custom shell for bootstrapping on new hosts, modifying nix-config, and secrets management
+    devShells = forAllSystems (
+      system:
+        import ./shell.nix {
+          pkgs = nixpkgs.legacyPackages.${system};
+        }
+    );
   };
 }
