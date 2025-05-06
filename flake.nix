@@ -1,92 +1,56 @@
 {
-  description = "Zach's nix configuration";
+  description = "Zach's Nix Configuration.";
 
-  inputs = {
-    # Official NixOS package source, using nixos's unstable branch by default
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable-small";
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
+  inputs = { 
+    #
+    # ===== Official NixOS, Darwin, and Home Manager package sources =====
+    #
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-    # MacOS
-    nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-24.05-darwin";
+    # The next two inputs are for pinning to nixpkgs stable or unstable regardless of what the default
+    # nixpkgs is set to.
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-24.11-darwin";
     nix-darwin = {
       url = "github:lnl7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs-darwin";
     };
-    
-    # Home-Manager, used for managing user configuration
+
     home-manager = {
       url = "github:nix-community/home-manager/master";
-
-      # The `follows` keyword in inputs is used for inheritance.
-      # Here, `inputs.nixpkgs` of home-manager is kept consistent with the `inputs.nixpkgs` of the current flake,
-      # to avoid problems caused by different versions of nixpkgs dependencies.
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = 
-  {
+  outputs = {
     self,
     nixpkgs,
-    nix-darwin,
-    home-manager,
     ...
-  }@inputs:
+  } @ inputs: 
   let
     inherit (self) outputs;
-    inherit (nixpkgs) lib;
-    specialArgs = {
-      inherit
-        inputs
-        outputs
-        nixpkgs
-        ;
-    };
-    configuration = { pkgs, ... }: {
-      # List packages installed in system profile. To search by name, run:
-      # $ nix-env -qaP | grep wget
-      environment.systemPackages =
-        [ pkgs.vim
-        ];
 
-      # Auto upgrade nix package and the daemon service.
-      services.nix-daemon.enable = true;
-      # nix.package = pkgs.nix;
+    #
+    # ===== Architectures =====
+    #
+    forAllSystems = nixpkgs.lib.genAttrs [
+      "x86_64-linux"
+      # Uncomment when MacOS hosts are added
+      # "aarch64-darwin"
+    ];
 
-      # Necessary for using flakes on this system.
-      nix.settings.experimental-features = "nix-command flakes";
+    #
+    # ===== Extending lib with lib.custom =====
+    #
+    lib = nixpkgs.lib.extend (self: super: { custom = import ./lib { inherit (nixpkgs) lib; }; });
 
-      # Create /etc/zshrc that loads the nix-darwin environment.
-      programs.zsh.enable = true;  # default shell on catalina
-      # programs.fish.enable = true;
-
-      # Set Git commit hash for darwin-version.
-      system.configurationRevision = self.rev or self.dirtyRev or null;
-
-      # Used for backwards compatibility, please read the changelog before changing.
-      # $ darwin-rebuild changelog
-      system.stateVersion = 4;
-
-      # The platform the configuration will be used on.
-      nixpkgs.hostPlatform = "aarch64-darwin";
-
-      users.users.zbbedewi.home = "/Users/zbbedewi";
-    };
-  in
-  {
-    darwinConfigurations."b0de28eaba18" = nix-darwin.lib.darwinSystem {
+  in {
+    nixosConfigurations.eye-of-god = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
       modules = [
-        configuration
-        home-manager.darwinModules.home-manager
-        {
-          # `home-manager` config
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.users.zbbedewi.imports = [
-            ./home.nix
-          ];
-        }
+        ./hosts/eye-of-god
       ];
     };
   };
