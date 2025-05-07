@@ -1,9 +1,9 @@
 {
   inputs,
   system,
-  pkgs,
   ...
-}: {
+}:
+{
   pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
     src = ./.;
     default_stages = [ "pre-commit" ];
@@ -55,8 +55,6 @@
           noLambdaArg = true;
         };
       };
-
-      end-of-file-fixer.enable = true;
     };
   };
 }
