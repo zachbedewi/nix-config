@@ -82,6 +82,7 @@
         system = "x86_64-linux";
         specialArgs = {
           inherit inputs outputs lib;
+          isDarwin = false;
         };
         modules = [
           ./hosts/eye-of-god
