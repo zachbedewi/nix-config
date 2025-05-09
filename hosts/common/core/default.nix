@@ -17,6 +17,8 @@ in
     inputs.sops-nix.${platformModules}.sops
 
     (map lib.custom.relativeToRoot [
+      "modules/common"
+
       "hosts/common/core/${platform}.nix"
     ])
   ];
