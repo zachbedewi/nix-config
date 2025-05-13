@@ -19,7 +19,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/master";
+      url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -78,16 +78,18 @@
       #
       # ===== Host Configurations =====
       #
-      nixosConfigurations.eye-of-god = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs outputs lib;
-          isDarwin = false;
-        };
-        modules = [
-          ./hosts/eye-of-god
-        ];
-      };
+      nixosConfigurations = builtins.listToAttrs (
+        map (host: {
+          name = host;
+          value = nixpkgs.lib.nixosSystem {
+            specialArgs = {
+              inherit inputs outputs lib;
+              isDarwin = false;
+            };
+            modules = [ ./hosts/nixos/${host} ];
+          };
+        }) (builtins.attrNames (builtins.readDir ./hosts/nixos))
+      );
 
       #
       # ===== Formatting and Pre-commit Hooks =====

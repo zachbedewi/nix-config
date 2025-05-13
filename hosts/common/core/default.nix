@@ -18,10 +18,21 @@ in
 
     (map lib.custom.relativeToRoot [
       "modules/common"
-
       "hosts/common/core/${platform}.nix"
+      "hosts/common/users/primary"
+      "hosts/common/users/primary/${platform}.nix"
     ])
   ];
+
+  #
+  # ===== Core Host Specifications =====
+  #
+  hostSpec = {
+    username = "skitzo";
+    handle = "skitzo";
+  };
+
+  networking.hostName = config.hostSpec.hostName;
 
   # System-wide packages, in case we log in as root
   environment.systemPackages = [ pkgs.openssh ];
