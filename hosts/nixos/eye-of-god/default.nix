@@ -78,8 +78,8 @@
 
   environment.systemPackages = with pkgs; [
     firefox
-    neovim
     alejandra
+    neovim
     statix
     deadnix
   ];

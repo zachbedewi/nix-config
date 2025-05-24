@@ -43,6 +43,14 @@
       url = "git+ssh://git@github.com/zachbedewi/nix-secrets.git?ref=main&shallow=1";
       flake = false;
     };
+
+    #
+    # ===== Emacs =====
+    #
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

@@ -1,4 +1,5 @@
-{inputs, ...}: let
+{ inputs, ... }:
+let
   stable-packages = final: _prev: {
     stable = import inputs.nixpkgs-stable {
       inherit (final) system;
@@ -12,8 +13,11 @@
       config.allowUnfree = true;
     };
   };
-in {
-  default = final: prev:
+in
+{
+  default =
+    final: prev:
     (stable-packages final prev)
-    // (unstable-packages final prev);
+    // (unstable-packages final prev)
+    // (inputs.emacs-overlay.overlay final prev);
 }
